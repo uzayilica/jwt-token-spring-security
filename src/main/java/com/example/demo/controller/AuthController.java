@@ -63,7 +63,7 @@ public class AuthController {
                        userDetails, null, userDetails.getAuthorities());
                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-               return  ResponseEntity.status(HttpStatus.OK).body("KULLANICI GİRİŞİ BAŞAIRLI");
+               return  ResponseEntity.status(HttpStatus.OK).body("KULLANICI GİRİŞİ BAŞAIRLIı");
 
            }
            else {
