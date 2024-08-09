@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Role;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(uniqueConstraints = @UniqueConstraint(name = "email",columnNames = "email"))
+
 public class Users extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,7 +17,6 @@ public class Users extends BaseEntity {
 
     private String username;
 
-    @Column(unique = true)
 
     private String email;
 
