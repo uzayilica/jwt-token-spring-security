@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Role;
 @Getter
 @Setter
 @Table(uniqueConstraints = @UniqueConstraint(name = "email",columnNames = "email"))
-public class Users {
+public class Users extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
