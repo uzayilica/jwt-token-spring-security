@@ -5,12 +5,13 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.security.MyUserDetailsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RequestMapping("/api/auth/v1")
@@ -47,6 +48,32 @@ public class AuthController {
             // Diğer beklenmeyen hatalar için genel hata yönetimi
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Bir hata oluştu: " + e.getMessage());
         }
+    }
+
+
+    @PostMapping("/loginn")
+    public ResponseEntity<?> login (@RequestParam String username , @RequestParam String password){
+        //login kontrolü yapılır ve SecurityContext Holder'a ekleme işlemi gerçekleştirilir.
+       try {
+           UserDetails userDetails = myUserDetailsService.loadUserByUsername(username);
+           // Kullanıcı zaten var, işlemleri yapalım şifresi doğru mu bakalım
+           if(passwordEncoder.matches(password,userDetails.getPassword())){
+
+               UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                       userDetails, null, userDetails.getAuthorities());
+               SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+
+               return  ResponseEntity.status(HttpStatus.OK).body("KULLANICI GİRİŞİ BAŞAIRLI");
+
+           }
+           else {
+               return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("şifre hatalı");
+           }
+       }
+       catch (Exception e){
+           return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("KULLANICI kayıtlı değil");
+       }
+
     }
 
 
