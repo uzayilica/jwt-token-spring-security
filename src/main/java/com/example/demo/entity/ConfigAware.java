@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 
-@Component("ConfigAware ")
+@Component("ConfigAware")
 public class ConfigAware implements AuditorAware<String> {
     @Override
     public Optional<String> getCurrentAuditor() {
