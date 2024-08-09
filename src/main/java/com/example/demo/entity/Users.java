@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Role;
 @NoArgsConstructor
 @Getter
 @Setter
-
+@ToString
 public class Users extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

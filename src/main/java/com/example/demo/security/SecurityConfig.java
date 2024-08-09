@@ -60,6 +60,7 @@ public class SecurityConfig {
                         .authorizeHttpRequests(req->req
                                 .requestMatchers(HttpMethod.GET).permitAll()
                                 .requestMatchers("/api/auth/v1/**").permitAll()
+                                .requestMatchers("/kafka/**").permitAll()
                                 .anyRequest().authenticated()
                         )
 
