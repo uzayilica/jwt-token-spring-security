@@ -43,7 +43,7 @@ public class AuthController {
             newuser.setEmail(users.getEmail());
             newuser.setRole(users.getRole());
             userRepository.save(newuser);
-            return ResponseEntity.status(HttpStatus.CREATED).body("Kullanıcı başarıyla kaydedildi.");
+            return ResponseEntity.status(HttpStatus.CREATED).body("Kullanıcı başarıyla kaydedildii.");
         } catch (Exception e) {
             // Diğer beklenmeyen hatalar için genel hata yönetimi
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Bir hata oluştu: " + e.getMessage());
