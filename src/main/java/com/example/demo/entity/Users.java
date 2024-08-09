@@ -21,7 +21,7 @@ public class Users {
 
     private String email;
 
-    private Long password;
+    private String password;
 
     @Enumerated(EnumType.STRING)
     private Roles role;
