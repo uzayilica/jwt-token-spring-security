@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class MyUserDetails  implements UserDetails {
+
     Users users;
 
     public MyUserDetails(Users users) {
@@ -28,5 +29,25 @@ public class MyUserDetails  implements UserDetails {
     @Override
     public String getUsername() {
         return users.getUsername();
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
