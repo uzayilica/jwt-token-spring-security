@@ -1,16 +1,24 @@
 package com.example.demo.controller;
 
 import com.example.demo.entity.Users;
+import com.example.demo.jwt.JwtService;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.MyUserDetailsService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @RequestMapping("/api/auth/v1")
@@ -20,11 +28,13 @@ public class AuthController {
     private final MyUserDetailsService myUserDetailsService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public AuthController(MyUserDetailsService myUserDetailsService, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthController(MyUserDetailsService myUserDetailsService, UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.myUserDetailsService = myUserDetailsService;
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @PostMapping("/register")
@@ -49,31 +59,35 @@ public class AuthController {
         }
     }
     @PostMapping("/loginn")
-    public ResponseEntity<?> login (@RequestParam String username , @RequestParam String password){
-        //login kontrolü yapılır ve SecurityContext Holder'a ekleme işlemi gerçekleştirilir.
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            UserDetails userDetails = myUserDetailsService.loadUserByUsername(username);
-            // Kullanıcı zaten var, işlemleri yapalım şifresi doğru mu bakalım
-            if(passwordEncoder.matches(password,userDetails.getPassword())){
+            // Kullanıcıyı veritabanından çek
+            Users user = userRepository.findByUsername(loginRequest.getUsername())
+                    .orElseThrow(() -> new UsernameNotFoundException("Kullanıcı bulunamadı"));
 
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            // Şifre kontrolü
+            if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+                // Kimlik doğrulama başarılı, JWT token oluştur
+                String token = jwtService.generateToken(user);
 
-                return  ResponseEntity.status(HttpStatus.OK).body("KULLANICI GİRİŞİ BAŞAIRLIı");
+                // Authentication nesnesini oluştur ve SecurityContext'e set et
+                // Users sınıfınızda getRole() metodu olduğunu varsayıyorum
+                List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(user.getRole().name()));
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        user.getUsername(), null, authorities);
+                SecurityContextHolder.getContext().setAuthentication(authToken);
 
+                // Token'i response body'de döndür
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Kullanıcı girişi başarılı");
+                response.put("token", token);
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Şifre hatalı");
             }
-            else {
-                return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("şifre hatalı");
-            }
+        } catch (UsernameNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Kullanıcı kayıtlı değil");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Bir hata oluştu: " + e.getMessage());
         }
-        catch (Exception e){
-            return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("KULLANICI kayıtlı değil");
-        }
-
-    }
-
-
-
-
-}
+    }   }
